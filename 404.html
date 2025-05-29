@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - 页面未找到 | PDF 转 JPG 高质量转换器</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f7f9fc;
+            color: #2c3e50;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .error-container {
+            max-width: 500px;
+        }
+
+        h1 {
+            color: #4a6df0;
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        p {
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+            color: #666;
+        }
+
+        .back-button {
+            background-color: #4a6df0;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background-color 0.3s;
+            display: inline-block;
+        }
+
+        .back-button:hover {
+            background-color: #5e35b1;
+        }
+
+        .error-code {
+            font-size: 8rem;
+            font-weight: bold;
+            color: rgba(74, 109, 240, 0.2);
+            margin-bottom: 20px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        
+        .header-content {
+            flex: 1;
+        }
+        
+        .lang-selector {
+            margin-left: 1rem;
+        }
+        
+        .lang-btn {
+            background-color: #4a6df0;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 15px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .lang-btn:hover {
+            background-color: #3a5bd0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <h1>PDF 转 JPG 高分辨率转换器</h1>
+                <p>保持最高图像质量的文件转换工具</p>
+            </div>
+            <div class="lang-selector">
+                <button id="langToggle" class="lang-btn">English</button>
+            </div>
+        </header>
+        
+        <div class="error-container">
+            <div class="error-code">404</div>
+            <h2>页面未找到</h2>
+            <p>您尝试访问的页面不存在或已被移动。</p>
+            <a href="index.html" class="home-btn">返回主页</a>
+        </div>
+        
+        <footer>
+            <p>© 2023 PDF转JPG高质量转换器 | 保持最高分辨率的PDF转图片工具</p>
+        </footer>
+    </div>
+    
+    <script>
+        // Simple language toggle for 404 page
+        const langToggle = document.getElementById('langToggle');
+        const translations = {
+            'zh-CN': {
+                'title': '404 - 页面未找到 | PDF 转 JPG 高质量转换器',
+                'header-title': 'PDF 转 JPG 高分辨率转换器',
+                'header-desc': '保持最高图像质量的文件转换工具',
+                'lang-toggle': 'English',
+                'error-title': '页面未找到',
+                'error-desc': '您尝试访问的页面不存在或已被移动。',
+                'home-btn': '返回主页',
+                'footer': '© 2023 PDF转JPG高质量转换器 | 保持最高分辨率的PDF转图片工具'
+            },
+            'en-US': {
+                'title': '404 - Page Not Found | PDF to JPG High Quality Converter',
+                'header-title': 'PDF to JPG High Resolution Converter',
+                'header-desc': 'File conversion tool maintaining the highest image quality',
+                'lang-toggle': '中文',
+                'error-title': 'Page Not Found',
+                'error-desc': 'The page you are trying to access does not exist or has been moved.',
+                'home-btn': 'Return to Home',
+                'footer': '© 2023 PDF to JPG High Quality Converter | PDF to Image tool maintaining highest resolution'
+            }
+        };
+        
+        // Get saved language or default to Chinese
+        let currentLang = getSavedLanguage() || 'zh-CN';
+        
+        // Set initial language based on saved preference
+        document.documentElement.setAttribute('lang', currentLang);
+        document.documentElement.setAttribute('data-lang', currentLang);
+        
+        // Function to get saved language preference
+        function getSavedLanguage() {
+            return localStorage.getItem('pdfToJpgLanguage');
+        }
+        
+        // Function to save language preference
+        function saveLanguage(lang) {
+            localStorage.setItem('pdfToJpgLanguage', lang);
+        }
+        
+        function toggleLanguage() {
+            currentLang = currentLang === 'zh-CN' ? 'en-US' : 'zh-CN';
+            document.documentElement.setAttribute('lang', currentLang);
+            document.documentElement.setAttribute('data-lang', currentLang);
+            saveLanguage(currentLang);
+            updatePageLanguage();
+        }
+        
+        function updatePageLanguage() {
+            document.title = translations[currentLang]['title'];
+            document.querySelector('.header-content h1').textContent = translations[currentLang]['header-title'];
+            document.querySelector('.header-content p').textContent = translations[currentLang]['header-desc'];
+            langToggle.textContent = translations[currentLang]['lang-toggle'];
+            
+            document.querySelector('.error-container h2').textContent = translations[currentLang]['error-title'];
+            document.querySelector('.error-container p').textContent = translations[currentLang]['error-desc'];
+            document.querySelector('.home-btn').textContent = translations[currentLang]['home-btn'];
+            
+            document.querySelector('footer p').textContent = translations[currentLang]['footer'];
+        }
+        
+        langToggle.addEventListener('click', toggleLanguage);
+        
+        // Initialize language
+        updatePageLanguage();
+    </script>
+</body>
+</html> 

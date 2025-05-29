@@ -1,0 +1,24 @@
+{
+  "name": "pdf-jpg-converter",
+  "version": "1.1.0",
+  "description": "高分辨率PDF转JPG转换器 - 已更新至最新PDF.js版本",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "pdfjs-dist": "^5.2.133",
+    "jszip": "^3.10.1",
+    "file-saver": "^2.0.5"
+  },
+  "keywords": [
+    "PDF",
+    "JPG",
+    "converter",
+    "high-resolution",
+    "image-conversion"
+  ],
+  "author": "",
+  "license": "MIT"
+} 
