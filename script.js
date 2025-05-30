@@ -56,7 +56,19 @@ document.addEventListener('DOMContentLoaded', function() {
             'download-current': '仅下载当前PDF',
             'pdf-only': '只支持上传PDF文件，其他格式已被忽略',
             'remove-file': '移除文件',
-            'footer': '© 2023 PDF转JPG高质量转换器 | 保持最高分辨率的PDF转图片工具'
+            'footer': '© 2023 PDF转JPG高质量转换器 | 保持最高分辨率的PDF转图片工具',
+            'theme-toggle-light': '切换到深色模式',
+            'theme-toggle-dark': '切换到浅色模式',
+            'estimated-size': '估计输出大小:',
+            'time-remaining': '预计剩余时间:',
+            'pages-processed': '已处理页数:',
+            'processing-speed': '处理速度:',
+            'pages-per-second': '页/秒',
+            'less-than-minute': '少于一分钟',
+            'minute': '分钟',
+            'minutes': '分钟',
+            'second': '秒',
+            'seconds': '秒'
         },
         'en-US': {
             'title': 'PDF to JPG High Quality Converter',
@@ -98,12 +110,27 @@ document.addEventListener('DOMContentLoaded', function() {
             'download-current': 'Download Current PDF Only',
             'pdf-only': 'Only PDF files are supported, other formats have been ignored',
             'remove-file': 'Remove file',
-            'footer': '© 2023 PDF to JPG High Quality Converter | PDF to Image tool maintaining highest resolution'
+            'footer': '© 2023 PDF to JPG High Quality Converter | PDF to Image tool maintaining highest resolution',
+            'theme-toggle-light': 'Switch to Dark Mode',
+            'theme-toggle-dark': 'Switch to Light Mode',
+            'estimated-size': 'Estimated output size:',
+            'time-remaining': 'Estimated time remaining:',
+            'pages-processed': 'Pages processed:',
+            'processing-speed': 'Processing speed:',
+            'pages-per-second': 'pages/sec',
+            'less-than-minute': 'less than a minute',
+            'minute': 'minute',
+            'minutes': 'minutes',
+            'second': 'second',
+            'seconds': 'seconds'
         }
     };
 
     // DOM elements
     const langToggle = document.getElementById('langToggle');
+    const themeToggle = document.getElementById('themeToggle');
+    const lightIcon = themeToggle.querySelector('.light-icon');
+    const darkIcon = themeToggle.querySelector('.dark-icon');
     const dropZone = document.getElementById('dropZone');
     const fileInput = document.getElementById('fileInput');
     const fileList = document.getElementById('fileList');
@@ -133,14 +160,31 @@ document.addEventListener('DOMContentLoaded', function() {
     let isConverting = false; // Flag to track if conversion is in progress
     let shouldCancel = false; // Flag to track if conversion should be cancelled
     let currentLang = getSavedLanguage() || 'zh-CN'; // Get saved language or default to Chinese
+    let currentTheme = getSavedTheme() || 'light'; // Get saved theme or default to light
+    
+    // Conversion statistics
+    let conversionStartTime = 0;
+    let pagesProcessed = 0;
+    let processingSpeed = 0;
+    let estimatedTimeRemaining = 0;
+    let updateStatsInterval = null;
     
     // Set initial language based on saved preference
     document.documentElement.setAttribute('lang', currentLang);
     document.documentElement.setAttribute('data-lang', currentLang);
     
+    // Set initial theme based on saved preference
+    document.documentElement.setAttribute('data-theme', currentTheme);
+    updateThemeToggleUI();
+    
     // Language toggle event listener
     langToggle.addEventListener('click', function() {
         toggleLanguage();
+    });
+    
+    // Theme toggle event listener
+    themeToggle.addEventListener('click', function() {
+        toggleTheme();
     });
     
     // Function to get saved language preference
@@ -152,6 +196,37 @@ document.addEventListener('DOMContentLoaded', function() {
     function saveLanguage(lang) {
         localStorage.setItem('pdfToJpgLanguage', lang);
     }
+
+    // Function to get saved theme preference
+    function getSavedTheme() {
+        return localStorage.getItem('pdfToJpgTheme');
+    }
+    
+    // Function to save theme preference
+    function saveTheme(theme) {
+        localStorage.setItem('pdfToJpgTheme', theme);
+    }
+    
+    // Function to toggle theme
+    function toggleTheme() {
+        currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', currentTheme);
+        saveTheme(currentTheme);
+        updateThemeToggleUI();
+    }
+    
+    // Function to update theme toggle UI
+    function updateThemeToggleUI() {
+        if (currentTheme === 'light') {
+            lightIcon.style.display = 'inline';
+            darkIcon.style.display = 'none';
+            themeToggle.setAttribute('aria-label', translations[currentLang]['theme-toggle-light']);
+        } else {
+            lightIcon.style.display = 'none';
+            darkIcon.style.display = 'inline';
+            themeToggle.setAttribute('aria-label', translations[currentLang]['theme-toggle-dark']);
+        }
+    }
     
     // Function to toggle language
     function toggleLanguage() {
@@ -160,6 +235,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.documentElement.setAttribute('data-lang', currentLang);
         saveLanguage(currentLang);
         updatePageLanguage();
+        updateThemeToggleUI();
     }
     
     // Function to update all text on the page based on selected language
@@ -171,6 +247,9 @@ document.addEventListener('DOMContentLoaded', function() {
         document.querySelector('header h1').textContent = translations[currentLang]['header-title'];
         document.querySelector('header p').textContent = translations[currentLang]['header-desc'];
         langToggle.textContent = translations[currentLang]['lang-toggle'];
+        
+        // Update theme toggle
+        themeToggle.setAttribute('aria-label', translations[currentLang][currentTheme === 'light' ? 'theme-toggle-light' : 'theme-toggle-dark']);
         
         // Update dropzone
         const browseBtn = dropZone.querySelector('.browse-btn');
@@ -233,6 +312,11 @@ document.addEventListener('DOMContentLoaded', function() {
         resultsContainer.querySelector('h3').textContent = translations[currentLang]['results-title'];
         downloadAllBtn.textContent = translations[currentLang]['download-all'];
         downloadCurrentBtn.textContent = translations[currentLang]['download-current'];
+        
+        // Update estimated size labels in file list
+        document.querySelectorAll('.estimate-label').forEach(el => {
+            el.textContent = translations[currentLang]['estimated-size'];
+        });
         
         // Update footer
         document.querySelector('footer p').textContent = translations[currentLang]['footer'];
@@ -318,25 +402,30 @@ document.addEventListener('DOMContentLoaded', function() {
     function handleFilesUpload(fileList) {
         let hasInvalidFiles = false;
         
-        Array.from(fileList).forEach(file => {
-            if (file.type !== 'application/pdf') {
-                hasInvalidFiles = true;
-                return; // Skip non-PDF files
+        // Convert FileList to Array and filter only PDF files
+        const newFiles = Array.from(fileList).filter(file => {
+            if (file.type === 'application/pdf') {
+                return true;
+            } else {
+                alert(translations[currentLang]['pdf-only']);
+                return false;
             }
+        });
+        
+        // Add files to our array
+        newFiles.forEach(file => {
+            // Check if file already exists in our array
+            const exists = pdfFiles.some(existingFile => 
+                existingFile.name === file.name && 
+                existingFile.size === file.size &&
+                existingFile.lastModified === file.lastModified
+            );
             
-            // Check if file already exists in our list
-            const fileExists = pdfFiles.some(existingFile => 
-                existingFile.name === file.name && existingFile.size === file.size);
-            
-            if (!fileExists) {
+            if (!exists) {
                 pdfFiles.push(file);
                 addFileToList(file);
             }
         });
-        
-        if (hasInvalidFiles) {
-            alert(translations[currentLang]['pdf-only']);
-        }
         
         updateUploadUI();
     }
@@ -347,26 +436,40 @@ document.addEventListener('DOMContentLoaded', function() {
         fileItem.className = 'file-item';
         fileItem.dataset.filename = file.name;
         
+        // Format file size
+        const fileSize = formatFileSize(file.size);
+        
+        // Calculate estimated output sizes based on settings
+        const dpiSetting = parseInt(document.getElementById('dpiSetting').value);
+        const qualitySetting = parseInt(document.getElementById('formatSetting').value);
+        
+        const estimatedSizeMB = estimateOutputSize(file.size, dpiSetting, qualitySetting);
+        
         fileItem.innerHTML = `
             <div class="file-icon">
                 <svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M14 2H6C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V8L14 2Z" stroke="#4a6df0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                     <path d="M14 2V8H20" stroke="#4a6df0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M12 18V12" stroke="#4a6df0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M9 15H15" stroke="#4a6df0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
             </div>
             <div class="file-details">
-                <p class="file-name">${file.name}</p>
-                <p class="file-size">${formatFileSize(file.size)}</p>
+                <div class="file-name">${file.name}</div>
+                <div class="file-size">${fileSize}</div>
+                <div class="file-estimate">
+                    <span class="estimate-label">${translations[currentLang]['estimated-size']}</span>
+                    <span>${estimatedSizeMB} MB</span>
+                </div>
             </div>
-            <button class="file-remove" title="${translations[currentLang]['remove-file']}" data-filename="${file.name}">×</button>
+            <button class="file-remove" data-filename="${file.name}" title="${translations[currentLang]['remove-file']}">×</button>
         `;
         
         fileItems.appendChild(fileItem);
         
-        // Add remove event
+        // Add event listener to the remove button
         fileItem.querySelector('.file-remove').addEventListener('click', function() {
-            const filename = this.dataset.filename;
-            removeFile(filename);
+            removeFile(this.dataset.filename);
         });
     }
     
@@ -406,50 +509,51 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Start conversion process
     async function startConversion() {
-        // Reset result arrays
-        pdfResults = [];
-        convertingIndex = 0;
+        if (pdfFiles.length === 0 || isConverting) return;
+        
+        // Reset conversion variables
         isConverting = true;
         shouldCancel = false;
+        convertingIndex = 0;
+        pdfResults = [];
+        pagesProcessed = 0;
+        conversionStartTime = Date.now();
         
-        // Show progress UI
+        // Reset UI
         progressContainer.hidden = false;
         resultsContainer.hidden = true;
         convertBtn.disabled = true;
-        cancelBtn.disabled = false;
-        cancelBtn.textContent = translations[currentLang]['cancel-btn'];
-        
-        // Prepare overall progress
+        progressBar.style.width = '0%';
+        progressText.textContent = translations[currentLang]['progress'] + ' 0%';
         overallProgressBar.style.width = '0%';
-        overallProgressText.textContent = `0/${pdfFiles.length} ${translations[currentLang]['files-completed']}`;
+        overallProgressText.textContent = '0/' + pdfFiles.length + ' ' + translations[currentLang]['files-completed'];
         
-        // Get parallel processing setting
-        const parallelProcessing = document.getElementById('parallelSetting') ? 
-            parseInt(document.getElementById('parallelSetting').value) : 1;
+        // Start stats update interval
+        updateStatsInterval = setInterval(updateConversionStats, 1000);
+        
+        // Get parallel processing count
+        const parallelCount = parseInt(document.getElementById('parallelSetting').value);
         
         try {
-            if (parallelProcessing > 1 && pdfFiles.length > 1) {
-                // Start parallel processing
-                await processFilesInParallel(parallelProcessing);
+            if (parallelCount > 1) {
+                await processFilesInParallel(parallelCount);
             } else {
-                // Start converting the files sequentially
                 await processNextFile();
             }
         } catch (error) {
-            console.error('转换过程中出错:', error);
-            if (!shouldCancel) {
-                alert('转换过程中出错: ' + error.message);
-            }
-        } finally {
-            isConverting = false;
-            
-            // If cancelled, show message
-            if (shouldCancel) {
-                alert('转换已取消');
-                // Reset UI
-                progressContainer.hidden = true;
-                convertBtn.disabled = false;
-            }
+            console.error('Conversion error:', error);
+            alert('转换过程中出现错误: ' + error.message);
+        }
+        
+        // Cleanup and show results
+        clearInterval(updateStatsInterval);
+        isConverting = false;
+        convertBtn.disabled = false;
+        
+        if (!shouldCancel && pdfResults.length > 0) {
+            showResults();
+        } else {
+            progressContainer.hidden = true;
         }
     }
     
@@ -473,33 +577,18 @@ document.addEventListener('DOMContentLoaded', function() {
         const processFile = async (fileIndex) => {
             if (fileIndex >= pdfFiles.length || shouldCancel) return;
             
-            const file = pdfFiles[fileIndex];
-            currentFileText.textContent = `${translations[currentLang]['processing']} ${file.name}`;
+            currentFileText.textContent = translations[currentLang]['processing'] + ' ' + pdfFiles[fileIndex].name;
             
             try {
-                await convertPdfToJpg(file);
-                completedFiles++;
+                const result = await convertPdfToJpg(pdfFiles[fileIndex]);
+                pdfResults[fileIndex] = result;
                 updateOverallProgress();
-                
-                // Process next file in queue
-                const nextIndex = convertingIndex++;
-                if (nextIndex < pdfFiles.length && !shouldCancel) {
-                    activeWorkers.add(processFile(nextIndex));
-                }
+                return result;
             } catch (error) {
-                console.error(`转换 ${file.name} 时出错:`, error);
-                if (!shouldCancel) {
-                    alert(`转换 ${file.name} 时出错: ${error.message}`);
-                }
-                
-                completedFiles++;
+                console.error('Error processing file:', error);
+                pdfResults[fileIndex] = createErrorPlaceholder(error.message);
                 updateOverallProgress();
-                
-                // Process next file despite error
-                const nextIndex = convertingIndex++;
-                if (nextIndex < pdfFiles.length && !shouldCancel) {
-                    activeWorkers.add(processFile(nextIndex));
-                }
+                throw error;
             }
         };
         
@@ -530,7 +619,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         const file = pdfFiles[convertingIndex];
-        currentFileText.textContent = `${translations[currentLang]['processing']} ${file.name}`;
+        currentFileText.textContent = translations[currentLang]['processing'] + ' ' + file.name;
         
         try {
             await convertPdfToJpg(file);
@@ -558,109 +647,88 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Function to convert PDF to JPG
     async function convertPdfToJpg(file) {
-        // Reset progress for current file
-        progressBar.style.width = '0%';
-        progressText.textContent = `${translations[currentLang]['progress']} 0%`;
+        const result = {
+            filename: file.name,
+            pages: [],
+            totalPages: 0,
+            errors: []
+        };
         
         try {
-            // Load the PDF file
+            // Read the PDF file
             const arrayBuffer = await readFileAsArrayBuffer(file);
-            const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-            const totalPages = pdf.numPages;
+            const pdf = await pdfjsLib.getDocument({data: arrayBuffer}).promise;
             
-            // Prepare result object for this file
-            const fileResult = {
-                file: file,
-                pages: []
-            };
+            result.totalPages = pdf.numPages;
             
             // Get DPI and quality settings
             const dpi = parseInt(document.getElementById('dpiSetting').value);
-            const quality = document.getElementById('formatSetting').value / 100;
+            const quality = parseInt(document.getElementById('formatSetting').value) / 100;
+            
+            // Calculate scale factor based on DPI (PDF default is 72 DPI)
+            const scaleFactor = dpi / 72;
+            
+            // Increment total processed pages tracker for progress stats
+            const totalProcessedPages = pagesProcessed;
+            
+            // Update the conversion progress
+            const updateProgress = (current, total) => {
+                const percent = Math.round((current / total) * 100);
+                progressBar.style.width = percent + '%';
+                
+                // Update pages processed counter for stats
+                pagesProcessed = totalProcessedPages + current;
+            };
             
             // Process each page
-            for (let i = 1; i <= totalPages; i++) {
-                // Check for cancellation
-                if (shouldCancel) {
-                    throw new Error('转换已取消');
-                }
-                
-                // Update progress
-                const progress = Math.round((i - 1) / totalPages * 100);
-                progressBar.style.width = `${progress}%`;
-                progressText.textContent = `${translations[currentLang]['progress']} ${progress}%`;
+            for (let i = 1; i <= pdf.numPages; i++) {
+                if (shouldCancel) break;
                 
                 try {
                     // Get the page
                     const page = await pdf.getPage(i);
-                    const scale = dpi / 72; // PDF default is 72 DPI
-                    const viewport = page.getViewport({ scale });
                     
-                    // Create a canvas to render the PDF page
+                    // Get viewport at the desired scale
+                    const viewport = page.getViewport({scale: scaleFactor});
+                    
+                    // Create canvas
                     const canvas = document.createElement('canvas');
-                    const context = canvas.getContext('2d');
-                    canvas.height = viewport.height;
                     canvas.width = viewport.width;
+                    canvas.height = viewport.height;
                     
-                    // Render the PDF page on the canvas
+                    const context = canvas.getContext('2d');
+                    
+                    // Render PDF page to canvas
                     await page.render({
                         canvasContext: context,
                         viewport: viewport
                     }).promise;
                     
-                    // Check for cancellation again
-                    if (shouldCancel) {
-                        throw new Error('转换已取消');
-                    }
-                    
                     // Convert canvas to JPG
-                    const jpgDataUrl = optimizeImage(canvas, quality);
+                    const jpgDataUrl = await optimizeImage(canvas, quality);
                     
-                    // Store the JPG data
-                    fileResult.pages.push({
-                        pageNum: i,
+                    // Add to result
+                    result.pages.push({
+                        pageNumber: i,
                         dataUrl: jpgDataUrl,
                         width: viewport.width,
                         height: viewport.height
                     });
                     
-                    // Clear canvas memory
-                    context.clearRect(0, 0, canvas.width, canvas.height);
-                    canvas.width = 0;
-                    canvas.height = 0;
-                    
-                    // Update progress again
-                    const newProgress = Math.round(i / totalPages * 100);
-                    progressBar.style.width = `${newProgress}%`;
-                    progressText.textContent = `${translations[currentLang]['progress']} ${newProgress}%`;
-                    
-                    // Force garbage collection with a small delay between pages for large documents
-                    if (totalPages > 20 && i % 5 === 0) {
-                        await new Promise(resolve => setTimeout(resolve, 100));
-                    }
-                } catch (pageError) {
-                    if (shouldCancel) {
-                        throw pageError; // Rethrow cancel error
-                    }
-                    
-                    console.error(`处理PDF "${file.name}" 第 ${i} 页时出错:`, pageError);
-                    // Add a placeholder for the failed page
-                    fileResult.pages.push({
-                        pageNum: i,
-                        dataUrl: createErrorPlaceholder(`第 ${i} 页处理失败`),
-                        width: 800,
-                        height: 600,
-                        error: true
-                    });
+                    // Update progress
+                    updateProgress(i, pdf.numPages);
+                } catch (err) {
+                    console.error(`Error processing page ${i}:`, err);
+                    result.errors.push(`Page ${i}: ${err.message}`);
                 }
             }
             
-            // Add result to the results array if not cancelled
-            if (!shouldCancel) {
-                pdfResults.push(fileResult);
-            }
+            // Add result to array
+            pdfResults[convertingIndex] = result;
+            
+            return result;
         } catch (error) {
-            console.error(`加载PDF "${file.name}" 时出错:`, error);
+            console.error('Error processing PDF:', error);
             throw error;
         }
     }
@@ -715,7 +783,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Create tab button
             const tabButton = document.createElement('button');
             tabButton.className = 'tab-button';
-            tabButton.textContent = result.file.name;
+            tabButton.textContent = result.filename;
             tabButton.dataset.index = index;
             tabButton.addEventListener('click', () => switchTab(index));
             resultTabButtons.appendChild(tabButton);
@@ -731,7 +799,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Add each preview image
             result.pages.forEach((page) => {
-                const previewItem = createPreviewItem(page, result.file.name);
+                const previewItem = createPreviewItem(page, result.filename);
                 previewGrid.appendChild(previewItem);
             });
             
@@ -806,7 +874,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (pdfResults.length === 0 || currentTabIndex >= pdfResults.length) return;
         
         const result = pdfResults[currentTabIndex];
-        const cleanFilename = result.file.name.replace(/\.pdf$/i, '');
+        const cleanFilename = result.filename.replace(/\.pdf$/i, '');
         
         // Create ZIP for this PDF only
         downloadPdfAsZip(result, `${cleanFilename}_转换结果.zip`);
@@ -855,7 +923,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Add each PDF's pages to the zip in separate folders
         for (const result of pdfResults) {
-            const folderName = result.file.name.replace(/\.pdf$/i, '');
+            const folderName = result.filename.replace(/\.pdf$/i, '');
             const folder = zip.folder(folderName);
             
             // Add each page to the folder
@@ -875,7 +943,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Download each PDF as a separate ZIP
     async function downloadAllAsMultipleZips() {
         for (const result of pdfResults) {
-            const cleanFilename = result.file.name.replace(/\.pdf$/i, '');
+            const cleanFilename = result.filename.replace(/\.pdf$/i, '');
             await downloadPdfAsZip(result, `${cleanFilename}_转换结果.zip`);
         }
     }
@@ -901,7 +969,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Download all pages as individual files
     function downloadAllAsIndividualFiles() {
         pdfResults.forEach(result => {
-            const cleanFilename = result.file.name.replace(/\.pdf$/i, '');
+            const cleanFilename = result.filename.replace(/\.pdf$/i, '');
             
             result.pages.forEach(page => {
                 downloadImage(page.dataUrl, `${cleanFilename}_第${page.pageNum}页.jpg`);
@@ -998,5 +1066,73 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateOverallProgressText() {
         const text = `${convertingIndex}/${pdfFiles.length} ${translations[currentLang]['files-completed']}`;
         overallProgressText.textContent = text;
+    }
+    
+    // Function to estimate output file size
+    function estimateOutputSize(pdfSize, dpi, quality) {
+        // Base estimation factor (empirical)
+        const baseFactor = 2.5;
+        
+        // DPI factor: higher DPI = larger files
+        const dpiFactor = (dpi / 300) * (dpi / 300); // Squared relation
+        
+        // Quality factor: higher quality = larger files
+        const qualityFactor = quality / 85;
+        
+        // Calculate estimated size in MB with one decimal place
+        const estimatedSizeMB = ((pdfSize / 1024 / 1024) * baseFactor * dpiFactor * qualityFactor).toFixed(1);
+        
+        return estimatedSizeMB;
+    }
+    
+    // Function to update conversion statistics
+    function updateConversionStats() {
+        // Calculate processing speed (pages per second)
+        const elapsedSeconds = (Date.now() - conversionStartTime) / 1000;
+        if (elapsedSeconds > 0) {
+            processingSpeed = (pagesProcessed / elapsedSeconds).toFixed(1);
+            
+            // Estimate remaining pages
+            let remainingPages = 0;
+            
+            // Count remaining pages in current and future PDFs
+            if (convertingIndex < pdfFiles.length) {
+                // For files not yet processed at all
+                for (let i = convertingIndex + 1; i < pdfFiles.length; i++) {
+                    // Estimate page count based on file size (rough estimate)
+                    remainingPages += Math.ceil(pdfFiles[i].size / 100000); // Assume ~100KB per page
+                }
+                
+                // Add remaining pages from current file if available
+                if (pdfResults[convertingIndex] && pdfResults[convertingIndex].totalPages) {
+                    const current = pdfResults[convertingIndex];
+                    remainingPages += (current.totalPages - current.pages.length);
+                }
+            }
+            
+            // Calculate estimated time remaining
+            if (processingSpeed > 0) {
+                estimatedTimeRemaining = remainingPages / processingSpeed;
+                
+                // Update UI with time estimate
+                document.getElementById('progressText').innerHTML = 
+                    `${translations[currentLang]['progress']} ${progressBar.style.width}<br>` + 
+                    `${translations[currentLang]['time-remaining']} ${formatTimeRemaining(estimatedTimeRemaining)}<br>` + 
+                    `${translations[currentLang]['pages-processed']} ${pagesProcessed}<br>` + 
+                    `${translations[currentLang]['processing-speed']} ${processingSpeed} ${translations[currentLang]['pages-per-second']}`;
+            }
+        }
+    }
+    
+    // Format time remaining in a human-readable format
+    function formatTimeRemaining(seconds) {
+        if (seconds < 60) {
+            return `${Math.ceil(seconds)} ${translations[currentLang][seconds === 1 ? 'second' : 'seconds']}`;
+        } else if (seconds < 120) {
+            return translations[currentLang]['less-than-minute'];
+        } else {
+            const minutes = Math.ceil(seconds / 60);
+            return `${minutes} ${translations[currentLang][minutes === 1 ? 'minute' : 'minutes']}`;
+        }
     }
 }); 
