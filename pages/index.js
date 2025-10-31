@@ -208,7 +208,7 @@ export default function Home() {
   } = usePdfConverter();
   
   // Handle file selection
-  const handleFilesSelected = (selectedFiles) => {
+  const handleFilesSelected = useCallback((selectedFiles) => {
     setFiles(selectedFiles);
     setConversionError(null);
     
@@ -225,10 +225,10 @@ export default function Home() {
       const estimatedTime = Math.ceil(totalSizeInMB * baseTimePerMB * dpiTimeMultiplier);
       setEstimatedProcessingTime(estimatedTime);
     }
-  };
+  }, [calculateEstimatedSize, settings.dpi, settings.quality]);
   
   // Handle settings change
-  const handleSettingsChange = (newSettings) => {
+  const handleSettingsChange = useCallback((newSettings) => {
     setSettings(newSettings);
     
     // Recalculate estimates when settings change
@@ -244,7 +244,7 @@ export default function Home() {
       const estimatedTime = Math.ceil(totalSizeInMB * baseTimePerMB * dpiTimeMultiplier);
       setEstimatedProcessingTime(estimatedTime);
     }
-  };
+  }, [files, calculateEstimatedSize]);
   
   // Format file size for display
   const formatFileSize = (bytes) => {

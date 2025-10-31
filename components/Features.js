@@ -7,8 +7,8 @@ const features = [
         <path d="M5.5 16a3.5 3.5 0 01-.369-6.98 4 4 0 117.753-1.977A4.5 4.5 0 1113.5 16h-8z" />
       </svg>
     ),
-    title: 'Browser-Based Conversion',
-    description: 'Convert PDF to JPG directly in your browser with no server uploads required, ensuring complete privacy and security.'
+    title: 'Server-Side Conversion',
+    description: 'Powerful server-side processing using Ghostscript, PDF.js, and other professional tools for reliable high-quality results.'
   },
   {
     icon: (
@@ -151,15 +151,15 @@ export default function Features() {
               <ul className="space-y-2 text-white/70 text-sm">
                 <li className="flex items-start">
                   <span className="text-primary mr-2">•</span>
-                  Latest PDF.js rendering engine
+                  Ghostscript conversion engine
                 </li>
                 <li className="flex items-start">
                   <span className="text-primary mr-2">•</span>
-                  High-performance Canvas API
+                  PDF.js rendering fallback
                 </li>
                 <li className="flex items-start">
                   <span className="text-primary mr-2">•</span>
-                  Client-side processing (no uploads)
+                  Server-side processing with Sharp
                 </li>
               </ul>
             </div>

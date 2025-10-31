@@ -1,3 +1,14 @@
+/**
+ * Custom Next.js Server
+ * 
+ * This custom server is used to:
+ * 1. Increase API timeout for large PDF file processing
+ * 2. Handle long-running conversion operations
+ * 
+ * For standard Next.js apps, you can use `next start` directly.
+ * This server is only needed if you want custom timeout configurations.
+ */
+
 const { createServer } = require('http');
 const { parse } = require('url');
 const next = require('next');
