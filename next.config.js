@@ -1,9 +1,17 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  swcMinify: true,
   images: {
-    domains: ['cdn.jsdelivr.net', 'picsum.photos'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'cdn.jsdelivr.net',
+      },
+      {
+        protocol: 'https',
+        hostname: 'picsum.photos',
+      },
+    ],
   },
   // Note: api configuration is moved to appropriate API route configs
   serverRuntimeConfig: {
@@ -34,6 +42,20 @@ const nextConfig = {
     removeConsole: process.env.NODE_ENV === 'production' ? {
       exclude: ['error', 'warn'],
     } : false,
+  },
+  // TypeScript configuration
+  typescript: {
+    // Set to true if you want production builds to complete even with type errors
+    ignoreBuildErrors: false,
+  },
+  // Enable Turbopack for faster builds (Next.js 15)
+  turbo: {
+    rules: {
+      '*.svg': {
+        loaders: ['@svgr/webpack'],
+        as: '*.js',
+      },
+    },
   },
 };
 

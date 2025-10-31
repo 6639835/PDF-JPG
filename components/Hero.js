@@ -91,28 +91,6 @@ export default function Hero() {
             Premium image conversion tool maintaining the highest quality and resolution for your PDF documents.
           </motion.p>
           
-          {/* Scroll Indicator */}
-          <motion.div 
-            className="absolute bottom-24 left-1/2 transform -translate-x-1/2"
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 1 }}
-          >
-            <div className="flex flex-col items-center">
-              <p className="text-white/60 text-sm uppercase tracking-widest mb-4">Scroll to Begin</p>
-              <motion.div 
-                className="w-6 h-10 border-2 border-white/30 rounded-full flex justify-center"
-                animate={{ y: [0, 10, 0] }}
-                transition={{ duration: 1.5, repeat: Infinity }}
-              >
-                <motion.div 
-                  className="w-1.5 h-1.5 bg-primary rounded-full mt-2"
-                  animate={{ y: [0, 12, 0] }}
-                  transition={{ duration: 1.5, repeat: Infinity, delay: 0.1 }}
-                />
-              </motion.div>
-            </div>
-          </motion.div>
         </div>
       </div>
       

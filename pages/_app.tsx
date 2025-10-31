@@ -1,5 +1,7 @@
 import { Inter } from 'next/font/google';
 import { useEffect, useState } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useThemeStore } from '@/store/useThemeStore';
 import '../styles/globals.css';
 
 // Initialize Inter font with specific subsets and features
@@ -10,15 +12,10 @@ const inter = Inter({
   weight: ['300', '400', '500', '600', '700'],
   fallback: ['system-ui', 'sans-serif'],
   preload: true,
-  features: {
-    salt: '1',
-    ss01: '1',
-    ss02: '1',
-  },
 });
 
 // Error boundary for production
-function ErrorFallback({ error }) {
+function ErrorFallback({ error }: { error: Error }) {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-dark text-white p-4">
       <div className="card-glass p-8 max-w-lg">
@@ -38,12 +35,36 @@ function ErrorFallback({ error }) {
   );
 }
 
-export default function MyApp({ Component, pageProps }) {
-  const [error, setError] = useState(null);
+// Create a client for React Query
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 1,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+    },
+  },
+});
+
+// Theme initializer component
+function ThemeInitializer() {
+  const setTheme = useThemeStore((state) => state.setTheme);
+  const theme = useThemeStore((state) => state.theme);
+
+  useEffect(() => {
+    // Initialize theme on mount
+    document.documentElement.classList.toggle('light', theme === 'light');
+  }, [theme]);
+
+  return null;
+}
+
+export default function MyApp({ Component, pageProps }: any) {
+  const [error, setError] = useState<Error | null>(null);
 
   // Error boundary for client-side errors
   useEffect(() => {
-    const handleError = (event) => {
+    const handleError = (event: ErrorEvent) => {
       console.error('Global error caught:', event.error);
       setError(event.error);
     };
@@ -66,8 +87,12 @@ export default function MyApp({ Component, pageProps }) {
   }
 
   return (
-    <div className={`${inter.variable} font-sans`}>
-      <Component {...pageProps} />
-    </div>
+    <QueryClientProvider client={queryClient}>
+      <div className={`${inter.variable} font-sans`}>
+        <ThemeInitializer />
+        <Component {...pageProps} />
+      </div>
+    </QueryClientProvider>
   );
 }
+

@@ -1,33 +1,44 @@
 {
   "name": "pdf-jpg-converter",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "High-resolution PDF to JPG converter with premium design",
   "main": "server.js",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.56.2",
     "file-saver": "^2.0.5",
-    "formidable": "^2.1.5",
-    "framer-motion": "^11.0.3",
+    "formidable": "^3.5.1",
+    "framer-motion": "^11.5.4",
     "jszip": "^3.10.1",
-    "next": "^14.1.0",
+    "next": "^15.0.2",
     "pdf-lib": "^1.17.1",
     "pdf-poppler": "^0.2.1",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "sharp": "^0.33.5",
-    "uuid": "^9.0.1"
+    "uuid": "^10.0.0",
+    "zod": "^3.23.8",
+    "zustand": "^4.5.5"
   },
   "devDependencies": {
-    "autoprefixer": "^10.4.17",
-    "eslint": "^8.56.0",
-    "eslint-config-next": "^14.1.0",
-    "postcss": "^8.4.35",
-    "tailwindcss": "^3.4.1"
+    "@types/file-saver": "^2.0.7",
+    "@types/formidable": "^3.4.5",
+    "@types/node": "22.18.13",
+    "@types/react": "18.3.26",
+    "@types/react-dom": "^18.3.0",
+    "@types/uuid": "^10.0.0",
+    "autoprefixer": "^10.4.20",
+    "eslint": "^8.57.0",
+    "eslint-config-next": "^15.0.2",
+    "postcss": "^8.4.47",
+    "tailwindcss": "^3.4.12",
+    "typescript": "^5.6.2"
   },
   "keywords": [
     "PDF",

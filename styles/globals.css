@@ -19,6 +19,71 @@ body {
   transition: background-color 0.3s var(--cubic-bezier-standard), color 0.3s var(--cubic-bezier-standard);
 }
 
+/* Light theme styles */
+html.light body {
+  @apply bg-gray-50 text-gray-900;
+}
+
+html.light .bg-dark {
+  @apply bg-white;
+}
+
+html.light .bg-dark-100 {
+  @apply bg-gray-50;
+}
+
+html.light .bg-dark-200 {
+  @apply bg-gray-100;
+}
+
+html.light .bg-dark-300 {
+  @apply bg-gray-200;
+}
+
+html.light .bg-dark-400 {
+  @apply bg-gray-300;
+}
+
+html.light .text-white {
+  @apply text-gray-900;
+}
+
+html.light .text-white\/90 {
+  @apply text-gray-800;
+}
+
+html.light .text-white\/80 {
+  @apply text-gray-700;
+}
+
+html.light .text-white\/70 {
+  @apply text-gray-600;
+}
+
+html.light .text-white\/60 {
+  @apply text-gray-500;
+}
+
+html.light .text-white\/30 {
+  @apply text-gray-400;
+}
+
+html.light .border-dark-300 {
+  @apply border-gray-300;
+}
+
+html.light .border-dark-400 {
+  @apply border-gray-400;
+}
+
+html.light .card-glass {
+  @apply bg-white/80 backdrop-blur-md border border-gray-200/50;
+}
+
+html.light .dropzone {
+  @apply bg-gray-50/50 hover:bg-gray-50/80 border-gray-300 hover:border-primary/50;
+}
+
 /* Grain texture */
 .bg-grain {
   position: relative;

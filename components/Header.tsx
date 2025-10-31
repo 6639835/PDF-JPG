@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useThemeStore } from '@/store/useThemeStore';
 
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [theme, setTheme] = useState('dark');
-  const [language, setLanguage] = useState('en');
+  const theme = useThemeStore((state) => state.theme);
+  const toggleTheme = useThemeStore((state) => state.toggleTheme);
 
   // Handle scroll effect
   useEffect(() => {
@@ -15,16 +16,6 @@ export default function Header() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  // Toggle theme
-  const toggleTheme = () => {
-    setTheme(theme === 'dark' ? 'light' : 'dark');
-  };
-
-  // Toggle language
-  const toggleLanguage = () => {
-    setLanguage(language === 'en' ? 'zh' : 'en');
-  };
 
   return (
     <motion.header 
@@ -59,7 +50,7 @@ export default function Header() {
             <a href="#faq" className="nav-link">FAQ</a>
           </motion.nav>
 
-          {/* Theme & Language Toggles */}
+          {/* Theme Toggle */}
           <motion.div 
             className="hidden md:flex items-center space-x-4"
             initial={{ opacity: 0 }}
@@ -80,12 +71,6 @@ export default function Header() {
                   <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
                 </svg>
               )}
-            </button>
-            <button 
-              className="btn-text py-1.5"
-              onClick={toggleLanguage}
-            >
-              {language === 'en' ? '中文' : 'EN'}
             </button>
           </motion.div>
 
@@ -124,6 +109,7 @@ export default function Header() {
             <button 
               className="w-10 h-10 rounded-full flex items-center justify-center border border-dark-300"
               onClick={toggleTheme}
+              aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
             >
               {theme === 'dark' ? (
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-primary" viewBox="0 0 20 20" fill="currentColor">
@@ -135,15 +121,10 @@ export default function Header() {
                 </svg>
               )}
             </button>
-            <button 
-              className="btn-text py-1.5"
-              onClick={toggleLanguage}
-            >
-              {language === 'en' ? '中文' : 'EN'}
-            </button>
           </div>
         </div>
       </div>
     </motion.header>
   );
-} 
+}
+
