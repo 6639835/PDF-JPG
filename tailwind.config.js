@@ -1,0 +1,125 @@
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: [
+    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
+    "./components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./app/**/*.{js,ts,jsx,tsx,mdx}",
+  ],
+  theme: {
+    extend: {
+      colors: {
+        primary: {
+          DEFAULT: '#d4af7d',
+          50: '#fbf8f4',
+          100: '#f8f1e9',
+          200: '#f1e2d3',
+          300: '#e7cdb5',
+          400: '#deba92',
+          500: '#d4af7d',
+          600: '#c89a63',
+          700: '#b78749',
+          800: '#9a6d3b',
+          900: '#7d5831',
+          950: '#422c19',
+        },
+        secondary: {
+          DEFAULT: '#78a0b4',
+          50: '#f4f8fa',
+          100: '#e9f1f5',
+          200: '#d3e2ea',
+          300: '#aecbd9',
+          400: '#8eb4c6',
+          500: '#78a0b4',
+          600: '#5e85a1',
+          700: '#4c6b84',
+          800: '#405a6f',
+          900: '#384c5c',
+          950: '#22303d',
+        },
+        dark: {
+          DEFAULT: '#000000',
+          100: '#0f0f0f',
+          200: '#1a1a1a',
+          300: '#2c2c2c',
+          400: '#3d3d3d',
+          500: '#6b6b6b',
+          600: '#858585',
+          700: '#a3a3a3',
+          800: '#c2c2c2',
+          900: '#e0e0e0',
+        },
+      },
+      fontFamily: {
+        sans: ['var(--font-inter)', 'system-ui', 'sans-serif'],
+      },
+      fontSize: {
+        xs: ['0.75rem', { lineHeight: '1rem', letterSpacing: '0.025em' }],
+        sm: ['0.875rem', { lineHeight: '1.25rem', letterSpacing: '0.025em' }],
+        base: ['1rem', { lineHeight: '1.5rem', letterSpacing: '0.025em' }],
+        lg: ['1.125rem', { lineHeight: '1.75rem', letterSpacing: '0.025em' }],
+        xl: ['1.25rem', { lineHeight: '1.75rem', letterSpacing: '0.03em' }],
+        '2xl': ['1.5rem', { lineHeight: '2rem', letterSpacing: '0.03em' }],
+        '3xl': ['1.875rem', { lineHeight: '2.25rem', letterSpacing: '0.035em' }],
+        '4xl': ['2.25rem', { lineHeight: '2.5rem', letterSpacing: '0.035em' }],
+        '5xl': ['3rem', { lineHeight: '1', letterSpacing: '0.04em' }],
+      },
+      animation: {
+        fadeIn: 'fadeIn 0.5s ease-in-out',
+        scaleIn: 'scaleIn 0.5s cubic-bezier(0.22, 1, 0.36, 1)',
+        slideInLeft: 'slideInLeft 0.5s cubic-bezier(0.22, 1, 0.36, 1)',
+        slideInRight: 'slideInRight 0.5s cubic-bezier(0.22, 1, 0.36, 1)',
+        splitReveal: 'splitReveal 0.7s cubic-bezier(0.22, 1, 0.36, 1)',
+        imageZoom: 'imageZoom 0.5s cubic-bezier(0.22, 1, 0.36, 1)',
+        floatSlow: 'floatSlow 8s ease-in-out infinite',
+      },
+      keyframes: {
+        fadeIn: {
+          '0%': { opacity: 0 },
+          '100%': { opacity: 1 },
+        },
+        scaleIn: {
+          '0%': { opacity: 0, transform: 'scale(0.95)' },
+          '100%': { opacity: 1, transform: 'scale(1)' },
+        },
+        slideInLeft: {
+          '0%': { opacity: 0, transform: 'translateX(-20px)' },
+          '100%': { opacity: 1, transform: 'translateX(0)' },
+        },
+        slideInRight: {
+          '0%': { opacity: 0, transform: 'translateX(20px)' },
+          '100%': { opacity: 1, transform: 'translateX(0)' },
+        },
+        splitReveal: {
+          '0%': { transform: 'translateY(100%)', opacity: 0 },
+          '100%': { transform: 'translateY(0)', opacity: 1 },
+        },
+        imageZoom: {
+          '0%': { transform: 'scale(1)' },
+          '100%': { transform: 'scale(1.05)' },
+        },
+        floatSlow: {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-10px)' },
+        },
+      },
+      backdropFilter: {
+        'none': 'none',
+        'blur': 'blur(8px)',
+      },
+      borderWidth: {
+        DEFAULT: '1px',
+        '0': '0',
+        '2': '2px',
+        '3': '3px',
+        '4': '4px',
+        '6': '6px',
+        '8': '8px',
+      },
+      boxShadow: {
+        glass: '0 4px 30px rgba(0, 0, 0, 0.1)',
+        'glass-lg': '0 10px 50px rgba(0, 0, 0, 0.15)',
+      },
+    },
+  },
+  plugins: [],
+}; 

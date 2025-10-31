@@ -1,59 +1,41 @@
-const http = require('http');
-const fs = require('fs');
-const path = require('path');
+const { createServer } = require('http');
+const { parse } = require('url');
+const next = require('next');
 
-const PORT = 3000;
-const MIME_TYPES = {
-    '.html': 'text/html',
-    '.css': 'text/css',
-    '.js': 'text/javascript',
-    '.mjs': 'text/javascript',
-    '.json': 'application/json',
-    '.svg': 'image/svg+xml',
-    '.png': 'image/png',
-    '.jpg': 'image/jpeg',
-    '.jpeg': 'image/jpeg',
-    '.gif': 'image/gif'
-};
+const dev = process.env.NODE_ENV !== 'production';
+const hostname = 'localhost';
+const port = process.env.PORT || 3000;
 
-const server = http.createServer((req, res) => {
-    console.log(`${req.method} ${req.url}`);
-    
-    // Handle root URL
-    let filePath = req.url === '/' ? './index.html' : '.' + req.url;
-    
-    // Get the file extension
-    const extname = path.extname(filePath);
-    let contentType = MIME_TYPES[extname] || 'application/octet-stream';
-    
-    // Read the file
-    fs.readFile(filePath, (err, content) => {
-        if (err) {
-            if (err.code === 'ENOENT') {
-                // Page not found
-                fs.readFile('./404.html', (err, content) => {
-                    if (err) {
-                        res.writeHead(404);
-                        res.end('404 Not Found');
-                    } else {
-                        res.writeHead(404, { 'Content-Type': 'text/html' });
-                        res.end(content, 'utf-8');
-                    }
-                });
-            } else {
-                // Server error
-                res.writeHead(500);
-                res.end(`Server Error: ${err.code}`);
-            }
-        } else {
-            // Success
-            res.writeHead(200, { 'Content-Type': contentType });
-            res.end(content, 'utf-8');
-        }
-    });
-});
+// Create the Next.js app instance
+const app = next({ dev, hostname });
+const handle = app.getRequestHandler();
 
-server.listen(PORT, () => {
-    console.log(`Server running at http://localhost:${PORT}/`);
-    console.log('Press Ctrl+C to stop the server');
+// Start the server
+app.prepare().then(() => {
+  createServer(async (req, res) => {
+    try {
+      // Set higher timeout for API routes that handle file processing
+      if (req.url.startsWith('/api/')) {
+        // Increase timeout for API routes (10 minutes for large files)
+        req.setTimeout(10 * 60 * 1000);
+        res.setTimeout(10 * 60 * 1000);
+      }
+      
+      // Set larger body size limits for uploads
+      // Note: This doesn't actually affect the request size limit
+      // Use the config in next.config.js and formidable options for that
+      
+      const parsedUrl = parse(req.url, true);
+      await handle(req, res, parsedUrl);
+    } catch (err) {
+      console.error('Error occurred handling', req.url, err);
+      res.statusCode = 500;
+      res.end('Internal Server Error');
+    }
+  }).listen(port, (err) => {
+    if (err) throw err;
+    console.log(`> Ready on http://${hostname}:${port}`);
+    console.log('> PDF to JPG Converter is running');
+    console.log('> Press Ctrl+C to stop the server');
+  });
 }); 

@@ -1,16 +1,36 @@
 {
   "name": "pdf-jpg-converter",
-  "version": "1.1.0",
-  "description": "高分辨率PDF转JPG转换器 - 已更新至最新PDF.js版本",
+  "version": "2.0.0",
+  "description": "High-resolution PDF to JPG converter with premium design",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node server.js"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
   },
   "dependencies": {
-    "pdfjs-dist": "^5.2.133",
+    "canvas": "^3.1.0",
+    "file-saver": "^2.0.5",
+    "formidable": "^2.1.5",
+    "framer-motion": "^11.0.3",
+    "gm": "^1.25.1",
     "jszip": "^3.10.1",
-    "file-saver": "^2.0.5"
+    "next": "^14.1.0",
+    "pdf-lib": "^1.17.1",
+    "pdf-poppler": "^0.2.1",
+    "pdfjs-dist": "^5.3.31",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "sharp": "^0.33.5",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.17",
+    "eslint": "^8.56.0",
+    "eslint-config-next": "^14.1.0",
+    "postcss": "^8.4.35",
+    "tailwindcss": "^3.4.1"
   },
   "keywords": [
     "PDF",
@@ -21,4 +41,4 @@
   ],
   "author": "",
   "license": "MIT"
-} 
+}
