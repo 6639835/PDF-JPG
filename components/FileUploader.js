@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function FileUploader({ onFilesSelected }) {
@@ -7,6 +7,26 @@ export default function FileUploader({ onFilesSelected }) {
   const [errorMessage, setErrorMessage] = useState('');
   const [isValidating, setIsValidating] = useState(false);
   const fileInputRef = useRef(null);
+  const onFilesSelectedRef = useRef(onFilesSelected);
+  const isInitialMount = useRef(true);
+  
+  // Update the ref when callback changes
+  useEffect(() => {
+    onFilesSelectedRef.current = onFilesSelected;
+  }, [onFilesSelected]);
+  
+  // Notify parent when files change (using ref to avoid dependency loop)
+  useEffect(() => {
+    // Skip the initial mount to avoid triggering with empty array
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+    
+    if (onFilesSelectedRef.current) {
+      onFilesSelectedRef.current(files);
+    }
+  }, [files]);
 
   const handleDragEnter = useCallback((e) => {
     e.preventDefault();
@@ -111,15 +131,11 @@ export default function FileUploader({ onFilesSelected }) {
         }
       });
       
-      if (onFilesSelected) {
-        onFilesSelected(updatedFiles);
-      }
-      
       return updatedFiles;
     });
     
     setIsValidating(false);
-  }, [onFilesSelected]);
+  }, []);
 
   const handleDrop = useCallback((e) => {
     e.preventDefault();
@@ -144,21 +160,12 @@ export default function FileUploader({ onFilesSelected }) {
   }, []);
 
   const removeFile = useCallback((fileName) => {
-    setFiles(prevFiles => {
-      const updatedFiles = prevFiles.filter(file => file.name !== fileName);
-      if (onFilesSelected) {
-        onFilesSelected(updatedFiles);
-      }
-      return updatedFiles;
-    });
-  }, [onFilesSelected]);
+    setFiles(prevFiles => prevFiles.filter(file => file.name !== fileName));
+  }, []);
 
   const clearAllFiles = useCallback(() => {
     setFiles([]);
-    if (onFilesSelected) {
-      onFilesSelected([]);
-    }
-  }, [onFilesSelected]);
+  }, []);
 
   const formatFileSize = (bytes) => {
     if (bytes === 0) return '0 Bytes';

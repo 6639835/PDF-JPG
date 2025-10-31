@@ -1,6 +1,22 @@
 import { motion } from 'framer-motion';
+import { useState, useEffect } from 'react';
 
 export default function Hero() {
+  const [particles, setParticles] = useState([]);
+  
+  // Generate particle positions only on client side to avoid hydration mismatch
+  useEffect(() => {
+    setParticles(
+      Array.from({ length: 20 }).map(() => ({
+        top: Math.random() * 100,
+        left: Math.random() * 100,
+        yOffset: Math.random() * 20 - 10,
+        xOffset: Math.random() * 20 - 10,
+        duration: 5 + Math.random() * 5,
+      }))
+    );
+  }, []);
+  
   return (
     <div className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
       {/* Background Gradient */}
@@ -22,21 +38,21 @@ export default function Hero() {
       
       {/* Floating Particles */}
       <div className="absolute inset-0 z-0 opacity-30">
-        {Array.from({ length: 20 }).map((_, i) => (
+        {particles.map((particle, i) => (
           <motion.div
             key={i}
             className="absolute w-1 h-1 bg-primary rounded-full"
             style={{
-              top: `${Math.random() * 100}%`,
-              left: `${Math.random() * 100}%`,
+              top: `${particle.top}%`,
+              left: `${particle.left}%`,
             }}
             animate={{
-              y: [0, Math.random() * 20 - 10],
-              x: [0, Math.random() * 20 - 10],
+              y: [0, particle.yOffset],
+              x: [0, particle.xOffset],
               opacity: [0.3, 0.8, 0.3],
             }}
             transition={{
-              duration: 5 + Math.random() * 5,
+              duration: particle.duration,
               repeat: Infinity,
               repeatType: "reverse",
               ease: "easeInOut",

@@ -63,12 +63,17 @@ function usePdfConverter() {
   
   // Server-side conversion function
   const convertFiles = useCallback(async (files, settings) => {
-    if (!files || files.length === 0) return;
+    console.log('convertFiles called with', files?.length, 'files');
+    if (!files || files.length === 0) {
+      console.log('No files provided to convertFiles');
+      return;
+    }
     
     // Clean up any previous conversion
     cleanup();
     
     try {
+      console.log('Initializing conversion state...');
       // Initialize conversion state
       setIsConverting(true);
       setIsUploading(true);
@@ -89,16 +94,26 @@ function usePdfConverter() {
       const formData = new FormData();
       
       // Add settings
-      formData.append('dpi', settings.dpi || '300');
-      formData.append('quality', settings.quality || '95');
-      formData.append('parallelProcessing', settings.parallelProcessing || '1');
+      const dpiValue = settings.dpi || '300';
+      const qualityValue = settings.quality || '95';
+      const parallelValue = settings.parallelProcessing || '1';
+      
+      console.log('Settings being sent:', { dpiValue, qualityValue, parallelValue });
+      
+      formData.append('dpi', dpiValue);
+      formData.append('quality', qualityValue);
+      formData.append('parallelProcessing', parallelValue);
       
       // Add files
       files.forEach(file => {
         formData.append('pdfFiles', file);
+        console.log('Adding file:', file.name, 'size:', file.size);
       });
       
       setCurrentFile('Uploading files...');
+      
+      console.log('Starting upload with', files.length, 'files');
+      console.log('Settings:', settings);
       
       // Upload files and start conversion
       const response = await fetch('/api/convert', {
@@ -107,6 +122,7 @@ function usePdfConverter() {
         signal: abortControllerRef.current.signal
       });
       
+      console.log('Upload response received:', response.status);
       setIsUploading(false);
       
       if (!response.ok) {
@@ -264,14 +280,18 @@ export default function Home() {
   
   // Start conversion
   const handleStartConversion = async () => {
+    console.log('handleStartConversion called, files:', files.length);
     if (files.length > 0) {
       setConversionError(null);
       
       try {
         await convertFiles(files, settings);
       } catch (error) {
+        console.error('Conversion error:', error);
         setConversionError(error.message);
       }
+    } else {
+      console.log('No files to convert');
     }
   };
   
