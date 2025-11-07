@@ -1,12 +1,22 @@
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { FC, useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { formatFileSize } from '@/lib/utils';
 
-export default function FileUploader({ onFilesSelected }) {
+interface FileUploaderProps {
+  onFilesSelected: (files: File[]) => void;
+}
+
+interface ValidationResult {
+  valid: boolean;
+  message?: string;
+}
+
+const FileUploader: FC<FileUploaderProps> = ({ onFilesSelected }) => {
   const [isDragging, setIsDragging] = useState(false);
-  const [files, setFiles] = useState([]);
+  const [files, setFiles] = useState<File[]>([]);
   const [errorMessage, setErrorMessage] = useState('');
   const [isValidating, setIsValidating] = useState(false);
-  const fileInputRef = useRef(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const onFilesSelectedRef = useRef(onFilesSelected);
   const isInitialMount = useRef(true);
   
@@ -28,26 +38,26 @@ export default function FileUploader({ onFilesSelected }) {
     }
   }, [files]);
 
-  const handleDragEnter = useCallback((e) => {
+  const handleDragEnter = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(true);
   }, []);
 
-  const handleDragLeave = useCallback((e) => {
+  const handleDragLeave = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
   }, []);
 
-  const handleDragOver = useCallback((e) => {
+  const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
     if (!isDragging) setIsDragging(true);
   }, [isDragging]);
 
   // Validate PDF file using PDF.js
-  const validatePdfFile = async (file) => {
+  const validatePdfFile = async (file: File): Promise<ValidationResult> => {
     try {
       // Check file extension first
       if (!file.name.toLowerCase().endsWith('.pdf')) {
@@ -76,11 +86,11 @@ export default function FileUploader({ onFilesSelected }) {
       return { valid: true };
     } catch (error) {
       console.error('PDF validation error:', error);
-      return { valid: false, message: `Invalid PDF: ${error.message}` };
+      return { valid: false, message: `Invalid PDF: ${(error as Error).message}` };
     }
   };
 
-  const processFiles = useCallback(async (fileList) => {
+  const processFiles = useCallback(async (fileList: FileList) => {
     // Clear any previous error message
     setErrorMessage('');
     
@@ -89,12 +99,14 @@ export default function FileUploader({ onFilesSelected }) {
     setIsValidating(true);
     
     const allFiles = Array.from(fileList);
-    const pdfFiles = allFiles.filter(file => file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf'));
+    const pdfFiles = allFiles.filter(file => 
+      file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')
+    );
     
     // Show error if any non-PDF files were included
     if (pdfFiles.length < allFiles.length) {
-      const nonPdfFiles = allFiles.filter(file => !(file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')));
-      setErrorMessage(`${nonPdfFiles.length} file(s) ignored: Only PDF files are supported.`);
+      const nonPdfCount = allFiles.length - pdfFiles.length;
+      setErrorMessage(`${nonPdfCount} file(s) ignored: Only PDF files are supported.`);
     }
     
     if (pdfFiles.length === 0) {
@@ -106,15 +118,15 @@ export default function FileUploader({ onFilesSelected }) {
     }
     
     // Validate each PDF file
-    const validatedFiles = [];
-    const invalidFiles = [];
+    const validatedFiles: File[] = [];
+    const invalidFiles: { name: string; error: string }[] = [];
     
     for (const file of pdfFiles) {
       const validation = await validatePdfFile(file);
       if (validation.valid) {
         validatedFiles.push(file);
       } else {
-        invalidFiles.push({ name: file.name, error: validation.message });
+        invalidFiles.push({ name: file.name, error: validation.message || 'Invalid file' });
       }
     }
     
@@ -137,7 +149,7 @@ export default function FileUploader({ onFilesSelected }) {
     setIsValidating(false);
   }, []);
 
-  const handleDrop = useCallback((e) => {
+  const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
@@ -147,7 +159,7 @@ export default function FileUploader({ onFilesSelected }) {
     }
   }, [processFiles]);
 
-  const handleFileInputChange = useCallback((e) => {
+  const handleFileInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       processFiles(e.target.files);
     }
@@ -159,21 +171,13 @@ export default function FileUploader({ onFilesSelected }) {
     }
   }, []);
 
-  const removeFile = useCallback((fileName) => {
+  const removeFile = useCallback((fileName: string) => {
     setFiles(prevFiles => prevFiles.filter(file => file.name !== fileName));
   }, []);
 
   const clearAllFiles = useCallback(() => {
     setFiles([]);
   }, []);
-
-  const formatFileSize = (bytes) => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-  };
 
   return (
     <div className="w-full">
@@ -185,6 +189,14 @@ export default function FileUploader({ onFilesSelected }) {
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         onClick={handleBrowseClick}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            handleBrowseClick();
+          }
+        }}
+        aria-label="Drop PDF files here or click to browse"
       >
         <input
           type="file"
@@ -208,7 +220,7 @@ export default function FileUploader({ onFilesSelected }) {
           </div>
           <h3 className="text-lg font-light mb-2 text-white/90">Drop PDF files here</h3>
           <p className="text-white/60 text-sm mb-2">or</p>
-          <button className="btn-secondary py-2 px-4 text-xs">Browse Files</button>
+          <button className="btn-secondary py-2 px-4 text-xs" type="button">Browse Files</button>
           <p className="text-white/40 text-xs mt-4">Multiple PDF files supported</p>
         </motion.div>
       </div>
@@ -224,8 +236,8 @@ export default function FileUploader({ onFilesSelected }) {
             transition={{ duration: 0.3 }}
           >
             <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
             </svg>
             Validating PDF files...
           </motion.div>
@@ -265,6 +277,7 @@ export default function FileUploader({ onFilesSelected }) {
             <button 
               onClick={clearAllFiles} 
               className="btn-text py-1 px-2 text-xs"
+              type="button"
             >
               Clear All
             </button>
@@ -296,7 +309,8 @@ export default function FileUploader({ onFilesSelected }) {
                       removeFile(file.name);
                     }}
                     className="ml-2 text-white/50 hover:text-primary transition-colors p-1"
-                    aria-label="Remove file"
+                    aria-label={`Remove ${file.name}`}
+                    type="button"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
@@ -316,6 +330,7 @@ export default function FileUploader({ onFilesSelected }) {
             <button 
               className="btn-secondary w-full"
               onClick={handleBrowseClick}
+              type="button"
             >
               Add More Files
             </button>
@@ -324,4 +339,7 @@ export default function FileUploader({ onFilesSelected }) {
       )}
     </div>
   );
-} 
+};
+
+export default FileUploader;
+

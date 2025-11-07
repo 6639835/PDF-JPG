@@ -3,25 +3,27 @@
 export interface ConversionSettings {
   dpi: '300' | '600' | '1200';
   quality: '75' | '85' | '95';
-  exportMethod: 'single-zip' | 'individual' | 'merged-pdf';
+  exportMethod: 'single-zip' | 'multiple-zip' | 'no-zip' | 'individual' | 'merged-pdf';
   parallelProcessing: '1' | '2' | '4' | '8';
 }
 
 export interface PageResult {
   pageNumber: number;
-  filename: string;
-  path: string;
-  size: number;
+  dataUrl: string; // Base64 thumbnail for preview
   width: number;
   height: number;
+  path: string;
+  error?: string; // Optional error if page failed to process
 }
 
 export interface ConversionResult {
   filename: string;
-  originalSize: number;
+  originalFilename?: string;
+  safeFolderName?: string;
   pages: PageResult[];
-  totalSize: number;
+  totalPages: number;
   jobId: string;
+  error?: string; // Optional error if file failed to process
 }
 
 export interface ConversionProgress {
@@ -43,4 +45,3 @@ export interface ConversionError {
 }
 
 export type Theme = 'light' | 'dark';
-

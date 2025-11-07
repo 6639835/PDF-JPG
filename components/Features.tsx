@@ -1,6 +1,13 @@
 import { motion } from 'framer-motion';
+import { FC } from 'react';
 
-const features = [
+interface Feature {
+  icon: JSX.Element;
+  title: string;
+  description: string;
+}
+
+const features: Feature[] = [
   {
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" viewBox="0 0 20 20" fill="currentColor">
@@ -58,7 +65,7 @@ const features = [
   }
 ];
 
-export default function Features() {
+const Features: FC = () => {
   return (
     <section id="features" className="py-20 md:py-32 bg-dark">
       <div className="container mx-auto px-6">
@@ -78,7 +85,7 @@ export default function Features() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {features.map((feature, index) => (
             <motion.div
-              key={index}
+              key={feature.title}
               className="card-glass p-6 flex flex-col h-full"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -168,4 +175,7 @@ export default function Features() {
       </div>
     </section>
   );
-} 
+};
+
+export default Features;
+

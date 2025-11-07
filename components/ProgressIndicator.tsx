@@ -1,6 +1,20 @@
 import { motion } from 'framer-motion';
+import { FC } from 'react';
 
-export default function ProgressIndicator({
+interface ProgressIndicatorProps {
+  currentFile: string;
+  progress: number;
+  overallProgress: number;
+  totalFiles: number;
+  completedFiles: number;
+  pagesProcessed: number;
+  processingSpeed: number;
+  estimatedTimeRemaining: number;
+  onCancel: () => void;
+  isUploading: boolean;
+}
+
+const ProgressIndicator: FC<ProgressIndicatorProps> = ({
   currentFile,
   progress,
   overallProgress,
@@ -11,8 +25,8 @@ export default function ProgressIndicator({
   estimatedTimeRemaining,
   onCancel,
   isUploading
-}) {
-  const formatTimeRemaining = (seconds) => {
+}) => {
+  const formatTimeRemaining = (seconds: number): string => {
     if (seconds === 0) return 'Almost done';
     if (seconds < 60) return `${Math.round(seconds)} seconds`;
     const minutes = Math.floor(seconds / 60);
@@ -34,6 +48,7 @@ export default function ProgressIndicator({
           onClick={onCancel}
           className="btn-text py-1 px-3 text-xs"
           disabled={isUploading}
+          aria-label="Cancel conversion"
         >
           Cancel
         </button>
@@ -48,7 +63,14 @@ export default function ProgressIndicator({
           <span className="text-primary text-sm font-medium">{Math.round(progress)}%</span>
         </div>
         <div className="progress-bar">
-          <div className="progress-fill" style={{ width: `${progress}%` }}></div>
+          <div 
+            className="progress-fill" 
+            style={{ width: `${progress}%` }}
+            role="progressbar"
+            aria-valuenow={progress}
+            aria-valuemin={0}
+            aria-valuemax={100}
+          />
         </div>
       </div>
 
@@ -59,7 +81,14 @@ export default function ProgressIndicator({
           <span className="text-primary text-sm font-medium">{completedFiles}/{totalFiles} files</span>
         </div>
         <div className="progress-bar">
-          <div className="progress-fill" style={{ width: `${overallProgress}%` }}></div>
+          <div 
+            className="progress-fill" 
+            style={{ width: `${overallProgress}%` }}
+            role="progressbar"
+            aria-valuenow={overallProgress}
+            aria-valuemin={0}
+            aria-valuemax={100}
+          />
         </div>
       </div>
 
@@ -90,4 +119,7 @@ export default function ProgressIndicator({
       )}
     </motion.div>
   );
-} 
+};
+
+export default ProgressIndicator;
+

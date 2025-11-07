@@ -20,7 +20,7 @@ export default function Header() {
   return (
     <motion.header 
       className={`fixed top-0 left-0 w-full z-50 transition-all duration-300
-                 ${scrolled ? 'py-4 bg-dark-100/90 backdrop-blur' : 'py-6 bg-transparent'}`}
+                 ${scrolled ? 'pt-3 pb-3 bg-dark-100/90 backdrop-blur' : 'pt-0 pb-4 bg-transparent'}`}
       initial={{ y: -100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
@@ -46,8 +46,7 @@ export default function Header() {
           >
             <a href="#" className="nav-link active">Home</a>
             <a href="#features" className="nav-link">Features</a>
-            <a href="#gallery" className="nav-link">Gallery</a>
-            <a href="#faq" className="nav-link">FAQ</a>
+            <a href="#converter" className="nav-link">Converter</a>
           </motion.nav>
 
           {/* Theme Toggle */}
@@ -82,13 +81,13 @@ export default function Header() {
             transition={{ delay: 0.4 }}
           >
             <button 
-              className="w-10 h-10 flex flex-col items-center justify-center space-y-1.5"
+              className="w-10 h-10 flex flex-col items-center justify-center space-y-1.5 text-white"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label="Toggle menu"
             >
-              <span className={`w-6 h-0.5 bg-white transition-all transform ${mobileMenuOpen ? 'rotate-45 translate-y-2' : ''}`}></span>
-              <span className={`w-6 h-0.5 bg-white transition-all ${mobileMenuOpen ? 'opacity-0' : 'opacity-100'}`}></span>
-              <span className={`w-6 h-0.5 bg-white transition-all transform ${mobileMenuOpen ? '-rotate-45 -translate-y-2' : ''}`}></span>
+              <span className={`w-6 h-0.5 bg-current transition-all transform ${mobileMenuOpen ? 'rotate-45 translate-y-2' : ''}`}></span>
+              <span className={`w-6 h-0.5 bg-current transition-all ${mobileMenuOpen ? 'opacity-0' : 'opacity-100'}`}></span>
+              <span className={`w-6 h-0.5 bg-current transition-all transform ${mobileMenuOpen ? '-rotate-45 -translate-y-2' : ''}`}></span>
             </button>
           </motion.div>
         </div>
@@ -102,8 +101,7 @@ export default function Header() {
           <nav className="flex flex-col space-y-4 mb-6">
             <a href="#" className="nav-link active py-2">Home</a>
             <a href="#features" className="nav-link py-2">Features</a>
-            <a href="#gallery" className="nav-link py-2">Gallery</a>
-            <a href="#faq" className="nav-link py-2">FAQ</a>
+            <a href="#converter" className="nav-link py-2">Converter</a>
           </nav>
           <div className="flex items-center space-x-4 border-t border-dark-300 pt-4">
             <button 

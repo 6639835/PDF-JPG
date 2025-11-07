@@ -24,6 +24,7 @@ html.light body {
   @apply bg-gray-50 text-gray-900;
 }
 
+/* Background colors */
 html.light .bg-dark {
   @apply bg-white;
 }
@@ -44,6 +45,40 @@ html.light .bg-dark-400 {
   @apply bg-gray-300;
 }
 
+/* Background with opacity */
+html.light .bg-dark-100\/90 {
+  @apply bg-gray-50/90;
+}
+
+html.light .bg-dark-100\/95 {
+  @apply bg-gray-50/95;
+}
+
+html.light .bg-dark-100\/80 {
+  @apply bg-gray-50/80;
+}
+
+html.light .bg-dark-200\/80 {
+  @apply bg-gray-100/80;
+}
+
+html.light .bg-dark-200\/50 {
+  @apply bg-gray-100/50;
+}
+
+html.light .bg-dark-300\/50 {
+  @apply bg-gray-200/50;
+}
+
+html.light .bg-dark-300\/90 {
+  @apply bg-gray-200/90;
+}
+
+html.light .bg-dark-400\/90 {
+  @apply bg-gray-300/90;
+}
+
+/* Text colors */
 html.light .text-white {
   @apply text-gray-900;
 }
@@ -64,10 +99,19 @@ html.light .text-white\/60 {
   @apply text-gray-500;
 }
 
-html.light .text-white\/30 {
+html.light .text-white\/50 {
   @apply text-gray-400;
 }
 
+html.light .text-white\/40 {
+  @apply text-gray-400;
+}
+
+html.light .text-white\/30 {
+  @apply text-gray-300;
+}
+
+/* Border colors */
 html.light .border-dark-300 {
   @apply border-gray-300;
 }
@@ -76,12 +120,127 @@ html.light .border-dark-400 {
   @apply border-gray-400;
 }
 
+html.light .border-dark-300\/50 {
+  @apply border-gray-300/50;
+}
+
+html.light .border-dark-400\/50 {
+  @apply border-gray-400/50;
+}
+
+/* Component-specific styles */
 html.light .card-glass {
-  @apply bg-white/80 backdrop-blur-md border border-gray-200/50;
+  @apply bg-white/80 backdrop-blur-md border border-gray-200/50 shadow-sm;
 }
 
 html.light .dropzone {
   @apply bg-gray-50/50 hover:bg-gray-50/80 border-gray-300 hover:border-primary/50;
+}
+
+/* Gradient backgrounds */
+html.light .bg-gradient-to-b.from-dark-100.to-dark {
+  background-image: linear-gradient(to bottom, rgb(249 250 251), rgb(255 255 255));
+}
+
+html.light .bg-gradient-to-b.from-dark.to-dark-100 {
+  background-image: linear-gradient(to bottom, rgb(255 255 255), rgb(249 250 251));
+}
+
+html.light .bg-gradient-to-t.from-dark.to-transparent {
+  background-image: linear-gradient(to top, rgb(255 255 255), transparent);
+}
+
+html.light .bg-gradient-to-b.from-dark-100\/80.to-transparent {
+  background-image: linear-gradient(to bottom, rgba(249, 250, 251, 0.8), transparent);
+}
+
+/* Modal and overlay styles */
+html.light .modal-overlay {
+  @apply bg-white/95;
+}
+
+/* Form elements */
+html.light .form-input,
+html.light .form-select {
+  @apply bg-white border-gray-300 text-gray-900;
+}
+
+html.light .form-input::placeholder {
+  @apply text-gray-400;
+}
+
+/* Progress bars */
+html.light .progress-bar {
+  @apply bg-gray-200;
+}
+
+/* Scrollbar */
+html.light ::-webkit-scrollbar-track {
+  @apply bg-gray-100;
+}
+
+html.light ::-webkit-scrollbar-thumb {
+  @apply bg-primary-500;
+}
+
+html.light ::-webkit-scrollbar-thumb:hover {
+  @apply bg-primary-600;
+}
+
+/* Error notifications */
+html.light .error-notification {
+  @apply bg-gray-100 border-primary text-gray-700;
+}
+
+/* Nav links */
+html.light .nav-link {
+  @apply text-gray-600 hover:text-gray-900;
+}
+
+html.light .nav-link.active {
+  @apply text-gray-900;
+}
+
+/* Hamburger menu lines - handled by individual component styling */
+
+/* Shadow adjustments for light mode */
+html.light .shadow-glass {
+  box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.08);
+}
+
+html.light .shadow-glass-lg {
+  box-shadow: 0 8px 24px 0 rgba(0, 0, 0, 0.12);
+}
+
+/* Button adjustments */
+html.light .btn-primary {
+  @apply focus:ring-offset-gray-50;
+}
+
+html.light .btn-secondary {
+  @apply focus:ring-offset-gray-50;
+}
+
+html.light .btn-text {
+  @apply focus:ring-offset-gray-50;
+}
+
+/* Focus ring adjustments */
+html.light :focus-visible {
+  @apply ring-offset-gray-50;
+}
+
+/* Image frame adjustments */
+html.light .image-frame {
+  @apply border-gray-300;
+}
+
+html.light .image-frame:hover {
+  @apply border-primary/50;
+}
+
+html.light .image-frame-caption {
+  background-image: linear-gradient(to top, rgb(255 255 255), transparent);
 }
 
 /* Grain texture */

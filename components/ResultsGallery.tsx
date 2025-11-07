@@ -1,9 +1,22 @@
-import { useState, useEffect, useCallback } from 'react';
+import { FC, useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import type { ConversionResult } from '@/types';
 
-export default function ResultsGallery({ results = [], onDownload, jobId, exportMethod = 'single-zip' }) {
+interface ResultsGalleryProps {
+  results?: ConversionResult[];
+  onDownload: (filename?: string) => void;
+  jobId?: string;
+  exportMethod?: 'single-zip' | 'multiple-zip' | 'no-zip' | 'individual' | 'merged-pdf';
+}
+
+const ResultsGallery: FC<ResultsGalleryProps> = ({ 
+  results = [], 
+  onDownload, 
+  jobId, 
+  exportMethod = 'single-zip' 
+}) => {
   const [selectedPdfIndex, setSelectedPdfIndex] = useState(0);
-  const [previewImage, setPreviewImage] = useState(null);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [previewIndex, setPreviewIndex] = useState(0);
   const [isDownloading, setIsDownloading] = useState(false);
   
@@ -11,11 +24,11 @@ export default function ResultsGallery({ results = [], onDownload, jobId, export
     return null;
   }
 
-  const handleTabClick = (index) => {
+  const handleTabClick = (index: number) => {
     setSelectedPdfIndex(index);
   };
 
-  const openPreview = (imageUrl, pageIndex) => {
+  const openPreview = (imageUrl: string, pageIndex: number) => {
     setPreviewImage(imageUrl);
     setPreviewIndex(pageIndex);
   };
@@ -48,7 +61,7 @@ export default function ResultsGallery({ results = [], onDownload, jobId, export
 
   // Add keyboard navigation
   useEffect(() => {
-    const handleKeyDown = (e) => {
+    const handleKeyDown = (e: KeyboardEvent) => {
       if (!previewImage) return;
       
       switch (e.key) {
@@ -80,13 +93,13 @@ export default function ResultsGallery({ results = [], onDownload, jobId, export
         // Server-side download
         const downloadUrl = `/api/download?jobId=${jobId}&fileIndices=${selectedPdfIndex}&exportMethod=${exportMethod}`;
         window.location.href = downloadUrl;
-      } else if (onDownload && results[selectedPdfIndex]) {
+      } else if (results[selectedPdfIndex]) {
         // Client-side fallback
         onDownload(results[selectedPdfIndex].filename);
       }
     } catch (error) {
       console.error('Download error:', error);
-      alert('Download failed: ' + error.message);
+      alert('Download failed: ' + (error as Error).message);
     } finally {
       setTimeout(() => setIsDownloading(false), 1000);
     }
@@ -102,19 +115,23 @@ export default function ResultsGallery({ results = [], onDownload, jobId, export
         // Server-side download
         const downloadUrl = `/api/download?jobId=${jobId}&exportMethod=${exportMethod}`;
         window.location.href = downloadUrl;
-      } else if (onDownload) {
+      } else {
         // Client-side fallback
         onDownload();
       }
     } catch (error) {
       console.error('Download error:', error);
-      alert('Download failed: ' + error.message);
+      alert('Download failed: ' + (error as Error).message);
     } finally {
       setTimeout(() => setIsDownloading(false), 1000);
     }
   };
 
-  const downloadSingleImage = async (imageUrl, pageNumber, filename) => {
+  const downloadSingleImage = async (
+    imageUrl: string, 
+    pageNumber: number, 
+    filename: string
+  ) => {
     try {
       setIsDownloading(true);
       
@@ -136,7 +153,7 @@ export default function ResultsGallery({ results = [], onDownload, jobId, export
       }
     } catch (error) {
       console.error('Download error:', error);
-      alert('Download failed: ' + error.message);
+      alert('Download failed: ' + (error as Error).message);
     } finally {
       setTimeout(() => setIsDownloading(false), 1000);
     }
@@ -164,12 +181,13 @@ export default function ResultsGallery({ results = [], onDownload, jobId, export
           <div className="flex space-x-2">
             {results.map((result, index) => (
               <button
-                key={index}
+                key={`${result.filename}-${index}`}
                 className={`px-4 py-2 text-sm whitespace-nowrap rounded-md transition-colors duration-300
                           ${selectedPdfIndex === index 
                             ? 'bg-primary text-dark-100' 
                             : 'bg-dark-300 text-white/70 hover:bg-dark-400'}`}
                 onClick={() => handleTabClick(index)}
+                type="button"
               >
                 {result.filename} ({result.pages.length})
               </button>
@@ -191,7 +209,7 @@ export default function ResultsGallery({ results = [], onDownload, jobId, export
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {results[selectedPdfIndex]?.pages.map((page, pageIndex) => (
                 <motion.div
-                  key={pageIndex}
+                  key={`page-${page.pageNumber}-${pageIndex}`}
                   className="image-frame aspect-[3/4] group cursor-pointer relative"
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
@@ -219,7 +237,8 @@ export default function ResultsGallery({ results = [], onDownload, jobId, export
                         );
                       }}
                       className="w-8 h-8 rounded-full bg-primary flex items-center justify-center hover:bg-primary-600 transition-colors"
-                      aria-label="Download page"
+                      aria-label={`Download page ${pageIndex + 1}`}
+                      type="button"
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-dark-100" viewBox="0 0 20 20" fill="currentColor">
                         <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
@@ -241,13 +260,14 @@ export default function ResultsGallery({ results = [], onDownload, jobId, export
           whileHover={{ scale: isDownloading ? 1 : 1.02 }}
           whileTap={{ scale: isDownloading ? 1 : 0.98 }}
           disabled={isDownloading}
+          type="button"
         >
           <span className="flex items-center justify-center">
             {isDownloading ? (
               <>
                 <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-dark-100" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                 </svg>
                 Preparing Download...
               </>
@@ -268,13 +288,14 @@ export default function ResultsGallery({ results = [], onDownload, jobId, export
           whileHover={{ scale: isDownloading ? 1 : 1.02 }}
           whileTap={{ scale: isDownloading ? 1 : 0.98 }}
           disabled={isDownloading}
+          type="button"
         >
           <span className="flex items-center justify-center">
             {isDownloading ? (
               <>
                 <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                 </svg>
                 Preparing Download...
               </>
@@ -314,7 +335,7 @@ export default function ResultsGallery({ results = [], onDownload, jobId, export
                 className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-glass-lg"
               />
               
-              <div className="absolute top-0 left-0 right-0 p-4 flex justify-between items-center bg-gradient-to-b from-dark-100/80 to-transparent">
+              <div className="absolute top-0 left-0 right-0 p-4 flex justify-between items-center bg-gradient-to-b from-dark-100/80 to-transparent rounded-t-lg">
                 <span className="text-white/90">
                   Page {previewIndex + 1} of {results[selectedPdfIndex]?.pages.length} - {results[selectedPdfIndex]?.filename}
                 </span>
@@ -322,6 +343,8 @@ export default function ResultsGallery({ results = [], onDownload, jobId, export
                   className="w-10 h-10 rounded-full bg-dark-400/90 flex items-center justify-center
                              hover:bg-dark-300 transition-colors duration-300"
                   onClick={closePreview}
+                  aria-label="Close preview"
+                  type="button"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
@@ -337,6 +360,7 @@ export default function ResultsGallery({ results = [], onDownload, jobId, export
                     previewIndex + 1, 
                     results[selectedPdfIndex].filename
                   )}
+                  type="button"
                 >
                   <span className="flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" viewBox="0 0 20 20" fill="currentColor">
@@ -356,6 +380,8 @@ export default function ResultsGallery({ results = [], onDownload, jobId, export
                       e.stopPropagation();
                       navigatePrev();
                     }}
+                    aria-label="Previous page"
+                    type="button"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -372,6 +398,8 @@ export default function ResultsGallery({ results = [], onDownload, jobId, export
                       e.stopPropagation();
                       navigateNext();
                     }}
+                    aria-label="Next page"
+                    type="button"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -385,4 +413,6 @@ export default function ResultsGallery({ results = [], onDownload, jobId, export
       </AnimatePresence>
     </motion.div>
   );
-} 
+};
+
+export default ResultsGallery;

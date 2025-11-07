@@ -1,22 +1,30 @@
-import { useState } from 'react';
+import { FC, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import type { ConversionSettings } from '@/types';
 
-export default function SettingsPanel({ onChange, estimatedSize = null, estimatedTime = null }) {
-  const [settings, setSettings] = useState({
+interface SettingsPanelProps {
+  onChange: (settings: ConversionSettings) => void;
+  estimatedSize?: string | null;
+  estimatedTime?: string | null;
+}
+
+const SettingsPanel: FC<SettingsPanelProps> = ({ 
+  onChange, 
+  estimatedSize = null, 
+  estimatedTime = null 
+}) => {
+  const [settings, setSettings] = useState<ConversionSettings>({
     dpi: '1200',
     quality: '95',
     exportMethod: 'single-zip',
     parallelProcessing: '4'
   });
 
-  const handleSettingChange = (e) => {
+  const handleSettingChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const { name, value } = e.target;
-    const updatedSettings = { ...settings, [name]: value };
+    const updatedSettings = { ...settings, [name]: value } as ConversionSettings;
     setSettings(updatedSettings);
-    
-    if (onChange) {
-      onChange(updatedSettings);
-    }
+    onChange(updatedSettings);
   };
 
   return (
@@ -45,7 +53,9 @@ export default function SettingsPanel({ onChange, estimatedSize = null, estimate
             <option value="600">600 DPI (High Quality)</option>
             <option value="1200">1200 DPI (Ultra High Quality)</option>
           </select>
-          <p className="text-white/40 text-xs mt-1">Higher DPI results in larger file sizes but better quality</p>
+          <p className="text-white/40 text-xs mt-1">
+            Higher DPI results in larger file sizes but better quality
+          </p>
         </div>
         
         {/* JPG Quality Setting */}
@@ -64,7 +74,9 @@ export default function SettingsPanel({ onChange, estimatedSize = null, estimate
             <option value="85">High Quality (85%)</option>
             <option value="75">Standard Quality (75%)</option>
           </select>
-          <p className="text-white/40 text-xs mt-1">Controls compression level of output JPG images</p>
+          <p className="text-white/40 text-xs mt-1">
+            Controls compression level of output JPG images
+          </p>
         </div>
         
         {/* Export Method Setting */}
@@ -83,7 +95,9 @@ export default function SettingsPanel({ onChange, estimatedSize = null, estimate
             <option value="multiple-zip">Each PDF in separate ZIP</option>
             <option value="no-zip">No ZIP, download all JPG files directly</option>
           </select>
-          <p className="text-white/40 text-xs mt-1">How you want to receive the converted files</p>
+          <p className="text-white/40 text-xs mt-1">
+            How you want to receive the converted files
+          </p>
         </div>
         
         {/* Parallel Processing Setting */}
@@ -102,7 +116,9 @@ export default function SettingsPanel({ onChange, estimatedSize = null, estimate
             <option value="2">2 parallel (medium memory)</option>
             <option value="4">4 parallel (high performance, large memory)</option>
           </select>
-          <p className="text-white/40 text-xs mt-1">Higher values use more memory but convert faster</p>
+          <p className="text-white/40 text-xs mt-1">
+            Higher values use more memory but convert faster
+          </p>
         </div>
       </div>
       
@@ -113,7 +129,9 @@ export default function SettingsPanel({ onChange, estimatedSize = null, estimate
         animate={{ opacity: 1 }}
         transition={{ delay: 0.3 }}
       >
-        <h4 className="text-sm uppercase tracking-wider text-white/70 mb-3 font-light">Estimated Information</h4>
+        <h4 className="text-sm uppercase tracking-wider text-white/70 mb-3 font-light">
+          Estimated Information
+        </h4>
         <div className="space-y-2">
           <div className="flex justify-between">
             <span className="text-white/50 text-sm">Output Size:</span>
@@ -131,4 +149,7 @@ export default function SettingsPanel({ onChange, estimatedSize = null, estimate
       </motion.div>
     </motion.div>
   );
-} 
+};
+
+export default SettingsPanel;
+

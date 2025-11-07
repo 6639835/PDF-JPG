@@ -48,7 +48,6 @@ const queryClient = new QueryClient({
 
 // Theme initializer component
 function ThemeInitializer() {
-  const setTheme = useThemeStore((state) => state.setTheme);
   const theme = useThemeStore((state) => state.theme);
 
   useEffect(() => {

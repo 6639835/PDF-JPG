@@ -17,7 +17,7 @@ export const conversionSettingsSchema = z.object({
   quality: z.enum(['75', '85', '95'], {
     errorMap: () => ({ message: 'Quality must be 75, 85, or 95' }),
   }),
-  exportMethod: z.enum(['single-zip', 'individual', 'merged-pdf'], {
+  exportMethod: z.enum(['single-zip', 'multiple-zip', 'no-zip', 'individual', 'merged-pdf'], {
     errorMap: () => ({ message: 'Invalid export method' }),
   }),
   parallelProcessing: z.enum(['1', '2', '4', '8'], {
@@ -31,23 +31,25 @@ export const conversionRequestSchema = z.object({
   settings: conversionSettingsSchema,
 });
 
-// Page result schema
+// Page result schema - matches actual API response
 export const pageResultSchema = z.object({
   pageNumber: z.number().int().positive(),
-  filename: z.string(),
-  path: z.string(),
-  size: z.number().int().positive(),
+  dataUrl: z.string(), // Base64 thumbnail
   width: z.number().int().positive(),
   height: z.number().int().positive(),
+  path: z.string(),
+  error: z.string().optional(),
 });
 
-// Conversion result schema
+// Conversion result schema - matches actual API response
 export const conversionResultSchema = z.object({
   filename: z.string(),
-  originalSize: z.number().int().positive(),
+  originalFilename: z.string().optional(),
+  safeFolderName: z.string().optional(),
   pages: z.array(pageResultSchema),
-  totalSize: z.number().int().positive(),
+  totalPages: z.number().int().positive(),
   jobId: z.string().uuid(),
+  error: z.string().optional(),
 });
 
 // API response schema
@@ -55,6 +57,7 @@ export const conversionResponseSchema = z.object({
   success: z.boolean(),
   message: z.string().optional(),
   results: z.array(conversionResultSchema).optional(),
+  jobId: z.string().uuid().optional(),
 });
 
 // Types inferred from schemas
@@ -64,4 +67,3 @@ export type ConversionRequest = z.infer<typeof conversionRequestSchema>;
 export type PageResultValidation = z.infer<typeof pageResultSchema>;
 export type ConversionResultValidation = z.infer<typeof conversionResultSchema>;
 export type ConversionResponse = z.infer<typeof conversionResponseSchema>;
-
